@@ -1,4 +1,4 @@
-# MMDG
+# MMDG-DTI
 
 Dependency
 The code has been tested in the following environment:
