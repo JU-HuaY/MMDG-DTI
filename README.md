@@ -17,8 +17,11 @@ Store the train model in a path "PATH_MODEL", the model could be loaded by the f
 >>> model_data = torch.load(PATH_MODEL)
 ```
 Data_process: The original data is first processed by the code document "Predata.py";
+
               Then we can use "data_split_name.py" to split the data sets; 
+              
               After that, we can run main.py. This file will also import "merge.py" and "model.py";
+              
               The only thing we have to do is to write the data protocols and the save path;
               
 ```python
