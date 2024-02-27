@@ -7,8 +7,11 @@ PyTorch-1.8.0,
 CUDA-11.1,
 
 Dataset link: https://drive.google.com/file/d/1TLcGFcpmgFIPqm1aBw-EW23TdOy0z7rL/view?usp=share_link
+
 BindingDB_Cold dataset: https://drive.google.com/file/d/1hSsu2D8XcRama_gnmp5FpxSEXi_wtbOV/view?usp=drive_link
+
 Trained models link: https://drive.google.com/file/d/1dSpGwBbFp6yOPtClY4a-LbjvWJrowhdY/view?usp=sharing
+
 Store the train model in a path "PATH_MODEL", the model could be loaded by the following code in main.py
 ```python
 >>> model_data = torch.load(PATH_MODEL)
