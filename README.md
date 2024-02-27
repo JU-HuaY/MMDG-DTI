@@ -15,5 +15,14 @@ Data_process: The original data is first processed by the code document "Predata
               Then we can use "data_split_name.py" to split the data sets; 
               After that, we can run main.py. This file will also import "merge.py" and "model.py";
               The only thing we have to do is to write the data protocols and the save path;
+              ```python
+>>> from transformers import AutoTokenizer, TFAutoModel
+
+>>> tokenizer = AutoTokenizer.from_pretrained("bert-base-uncased")
+>>> model = TFAutoModel.from_pretrained("bert-base-uncased")
+
+>>> inputs = tokenizer("Hello world!", return_tensors="tf")
+>>> outputs = model(**inputs)
+```
               The specific data protocols are described in the file "data_merge.py";
 
