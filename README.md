@@ -32,5 +32,6 @@ The only thing we have to do is to write the data protocols and the save path;
 >>> file_AUCs = 'output/result/AUCs--' + setting + '.txt'
 >>> file_model = 'output/model/' + setting
 ```
-              The specific data protocols are described in the file "data_merge.py";
+
+The specific data protocols are described in the file "data_merge.py";
 
