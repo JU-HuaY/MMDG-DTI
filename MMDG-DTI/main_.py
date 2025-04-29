@@ -113,10 +113,34 @@ def pack(molecule_words, molecule_atoms, molecule_adjs, proteins, sequences, smi
 
     return molecule_words_new, molecule_atoms_new, molecule_adjs_new, proteins_new, protein_LM, molecule_LM, labels_new, sources_new
 
+class EMA:
+    def __init__(self, model, decay=0.999):
+        self.model = model
+        self.decay = decay
+        self.shadow = {}
+
+        for name, param in model.named_parameters():
+            self.shadow[name] = param.clone()
+
+    def update(self):
+        with torch.no_grad():
+            for name, param in self.model.named_parameters():
+                self.shadow[name] = self.decay * self.shadow[name] + (1 - self.decay) * param
+
+    def apply_shadow(self):
+        with torch.no_grad():
+            for name, param in self.model.named_parameters():
+                param.copy_(self.shadow[name])
+
+    def restore(self):
+        with torch.no_grad():
+            for name, param in self.model.named_parameters():
+                param.copy_(self.shadow[name])
 
 class Trainer(object):
-    def __init__(self, model, batch_size, lr, weight_decay):
+    def __init__(self, model, batch_size, lr, weight_decay, ema):
         self.model = model
+        self.ema = ema
         self.optimizer = optim.AdamW(self.model.parameters(), lr=lr, weight_decay=weight_decay)
         # self.schedule = optim.lr_scheduler.CosineAnnealingLR(self.optimizer, T_max=150, eta_min=0)
         self.batch_size = batch_size
@@ -162,17 +186,21 @@ class Trainer(object):
                 self.optimizer.step()
                 # self.schedule.step()
                 self.optimizer.zero_grad()
+                self.ema.update()
             loss_total += loss.item()
             # loss_total2 += loss3.item()
 
         return loss_total
 
 class Tester(object):
-    def __init__(self, model, batch_size):
+    def __init__(self, model, batch_size, ema=None):
         self.model = model
         self.batch_size = batch_size
+        self.ema = ema
 
     def test(self, dataset, p_LMs, d_LMs):
+        if self.ema is not None:
+            self.ema.apply_shadow()
         N = len(dataset)
         T, S, Y, S2, Y2, S3, Y3 = [], [], [], [], [], [], []
         i = 0
@@ -234,8 +262,8 @@ class Tester(object):
         with open(filename, 'a') as f:
             f.write('\t'.join(map(str, AUCs)) + '\n')
 
-    def save_model(self, model, filename):
-        torch.save(model.state_dict(), filename)
+    def save_model(self, filename):
+        torch.save(self.model.state_dict(), filename)
 
 def setup_seed(seed):
     torch.manual_seed(seed)
@@ -269,10 +297,11 @@ if __name__ == "__main__":
     train_set, val_set = train_test_split(dataset_train, test_size=0.2, random_state=42)
     setup_seed(2023)
     model = DGMM_DTI(layer_gnn=layer_gnn, source_number=source_number, device=device, dropout=drop).to(device)
+    ema = EMA(model, decay=0.999)
     # model = torch.nn.DataParallel(model, device_ids=[1], output_device=1)
     # model = model.module.to(torch.device('cpu'))
-    trainer = Trainer(model, batch_size, lr, weight_decay)
-    tester = Tester(model, batch_size)
+    trainer = Trainer(model, batch_size, lr, weight_decay, ema)
+    tester = Tester(model, batch_size, ema)
 
     """Output files."""
     file_AUCs = 'output/result/AUCs--' + setting + '.txt'
@@ -305,4 +334,4 @@ if __name__ == "__main__":
         print('\t'.join(map(str, AUCs)))
         if auc1 < AUC_test:
             auc1 = AUC_test
-            tester.save_model(model, file_model)
+            tester.save_model(file_model)
