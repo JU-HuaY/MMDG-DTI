@@ -379,7 +379,6 @@ if __name__ == "__main__":
 
     DTI_datasets3("BindingDB_cold/unseen_pair_setting/Unseen pair/train.txt", 'BindingDB_cold/unseen_pair_setting/train/')
     DTI_datasets3("BindingDB_cold/unseen_pair_setting/Unseen pair/test.txt", 'BindingDB_cold/unseen_pair_setting/test/')
-    DTI_datasets3("BindingDB_cold/unseen_pair_setting/Unseen pair/dev.txt", 'BindingDB_cold/unseen_pair_setting/validate/')
     # #
     # DTI_datasets("GPCRs/original/GPCR_train.txt", 'GPCRs/train/')
     # DTI_datasets("GPCRs/original/GPCR_test.txt", 'GPCRs/test/')
